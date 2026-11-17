@@ -649,8 +649,11 @@
     });
     if (acc.role === 'admin') { loadReviewQueue(); loadMessages(); }
     $$('[data-provider-only]').forEach(function (x) { x.hidden = x.getAttribute('data-provider-only') !== (acc.provider || 'password'); });
+    $$('[data-set-name]').forEach(function (x) { x.textContent = acc.name || ''; });
+    $$('[data-set-country]').forEach(function (x) { x.textContent = acc.country || 'Country not set'; });
+    $$('[data-set-email]').forEach(function (x) { x.textContent = acc.email || ''; });
     $$('[data-profile-form]').forEach(function (f) {
-      if (f.contains(document.activeElement) && f.getAttribute('data-dirty')) return;
+      if (f.getAttribute('data-dirty')) return;
       f.elements.name.value = acc.name || ''; f.elements.country.value = acc.country || ''; f.elements.email.value = acc.email || '';
       f.removeAttribute('data-dirty');
     });
@@ -664,7 +667,7 @@
       if (!validate(f)) return status(f, 'Please fill in your name and country.', 'err');
       var btn = $('button[type=submit]', f); btn.disabled = true; status(f, 'Saving…');
       STORE.saveProfile({ name: f.elements.name.value.trim(), country: f.elements.country.value.trim() })
-        .then(function () { btn.disabled = false; f.removeAttribute('data-dirty'); status(f, 'Saved.', 'ok'); toast('Profile updated'); },
+        .then(function () { btn.disabled = false; f.removeAttribute('data-dirty'); status(f, ''); closeModal(f.closest('.modal')); toast('Profile updated'); },
               function (err) { btn.disabled = false; status(f, esc(err.message), 'err'); });
     });
   });
@@ -676,7 +679,7 @@
       if (nx.length < 8) return status(f, 'Use at least 8 characters for your new password.', 'err');
       if (nx !== cf) return status(f, 'The new passwords don’t match.', 'err');
       var btn = $('button[type=submit]', f); btn.disabled = true; status(f, 'Updating…');
-      STORE.changePassword(cur, nx).then(function () { btn.disabled = false; f.reset(); status(f, 'Password updated.', 'ok'); },
+      STORE.changePassword(cur, nx).then(function () { btn.disabled = false; f.reset(); status(f, ''); closeModal(f.closest('.modal')); toast('Password updated'); },
                                          function (err) { btn.disabled = false; status(f, esc(err.message), 'err'); });
     });
     $('[data-send-reset]', f).addEventListener('click', function () {
@@ -684,6 +687,13 @@
       STORE.resetPassword(ACC.email).then(function () { status(f, 'We sent a reset link to ' + esc(ACC.email) + '.', 'ok'); },
                                           function (err) { status(f, esc(err.message), 'err'); });
     });
+  });
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-open]'); if (!o) return;
+    var m = (o.closest('.route') || document).querySelector('#' + o.getAttribute('data-open')), f = $('form', m);
+    f.removeAttribute('data-dirty'); if (f.hasAttribute('data-password-form')) f.reset(); status(f, '');
+    if (ACC && f.hasAttribute('data-profile-form')) { f.elements.name.value = ACC.name || ''; f.elements.country.value = ACC.country || ''; }
+    openModal(m);
   });
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-delete-open]'); if (!b) return;

@@ -78,34 +78,12 @@
         <div class="table" data-articles></div>
       </div>
       <div class="card mt-24 settings" id="account-settings">
-        <div class="table-head"><h2>Account settings</h2></div>
-        <div class="set-grid">
-          <form class="form set-block" data-profile-form novalidate>
-            <h3>Profile</h3>
-            <label class="field"><span>Full name</span><input name="name" required autocomplete="name"></label>
-            <label class="field"><span>Country</span><input name="country" required autocomplete="country-name"></label>
-            <label class="field"><span>Email</span><input name="email" type="email" disabled></label>
-            <div class="set-actions"><button type="submit" class="btn btn-primary">Save changes</button></div>
-            <p class="form-status" role="status" aria-live="polite"></p>
-          </form>
-          <div class="set-block">
-            <form class="form" data-password-form novalidate data-provider-only="password">
-              <h3>Password</h3>
-              <label class="field"><span>Current password</span><input name="current" type="password" required autocomplete="current-password"></label>
-              <label class="field"><span>New password</span><input name="next" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></label>
-              <label class="field"><span>Confirm new password</span><input name="confirm" type="password" required autocomplete="new-password"></label>
-              <div class="set-actions"><button type="submit" class="btn btn-primary">Update password</button><button type="button" class="link-btn" data-send-reset>Email me a reset link</button></div>
-              <p class="form-status" role="status" aria-live="polite"></p>
-            </form>
-            <div data-provider-only="google" hidden>
-              <h3>Password</h3>
-              <p class="muted">You sign in with Google, so there’s no CrossView password to change. Manage your password in your Google account.</p>
-            </div>
-          </div>
-        </div>
-        <div class="danger-zone">
-          <div><h3>Delete account</h3><p class="muted">Permanently deletes your account, onboarding progress, drafts and submissions. Articles already published on the Youth Correspondents page stay up; ask an editor if you want them removed.</p></div>
-          <button type="button" class="btn btn-danger" data-delete-open><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M112 112l20 320c.95 18.49 14.4 32 32 32h184c17.67 0 30.87-13.51 32-32l20-320" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M80 112h352"/><path d="M192 112V72h0a23.93 23.93 0 0124-24h80a23.93 23.93 0 0124 24h0v40M256 176v224M184 176l8 224M328 176l-8 224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>Delete account</button>
+        <h2>Account settings</h2>
+        <div class="set-rows">
+          <div class="set-row"><span class="set-ic"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M344 144c-3.92 52.87-44 96-88 96s-84.15-43.12-88-96c-4-55 35-96 88-96s92 42 88 96z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path d="M256 304c-87 0-175.3 48-191.64 138.6C62.39 453.52 68.57 464 80 464h352c11.44 0 17.62-10.48 15.65-21.4C431.3 352 343 304 256 304z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/></svg></span><div class="set-info"><span class="set-label">Profile</span><span class="set-val"><span data-set-name></span><span class="set-sep">·</span><span data-set-country></span></span></div><button type="button" class="set-btn" data-open="profile-modal">Edit</button></div>
+          <div class="set-row"><span class="set-ic"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect x="48" y="96" width="416" height="320" rx="40" ry="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l144 112 144-112"/></svg></span><div class="set-info"><span class="set-label">Email</span><span class="set-val" data-set-email></span></div></div>
+          <div class="set-row"><span class="set-ic"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M336 208v-95a80 80 0 00-160 0v95" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><rect x="96" y="208" width="320" height="272" rx="48" ry="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg></span><div class="set-info"><span class="set-label">Password</span><span class="set-val" data-provider-only="password">••••••••</span><span class="set-val" data-provider-only="google" hidden>Signed in with Google</span></div><button type="button" class="set-btn" data-open="password-modal" data-provider-only="password">Change</button></div>
+          <div class="set-row"><span class="set-ic danger"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M112 112l20 320c.95 18.49 14.4 32 32 32h184c17.67 0 30.87-13.51 32-32l20-320" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M80 112h352"/><path d="M192 112V72h0a23.93 23.93 0 0124-24h80a23.93 23.93 0 0124 24h0v40M256 176v224M184 176l8 224M328 176l-8 224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg></span><div class="set-info"><span class="set-label">Delete account</span><span class="set-val">Removes your account, progress and drafts. Published articles stay up.</span></div><button type="button" class="set-btn danger" data-delete-open>Delete</button></div>
         </div>
       </div>
       <div class="dash-out"><button type="button" class="link-btn" data-sign-out><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M304 336v40a40 40 0 01-40 40H104a40 40 0 01-40-40V136a40 40 0 0140-40h152c22.09 0 48 17.91 48 40v40M368 336l80-80-80-80M176 256h256" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>Sign out</button></div>
@@ -141,7 +119,34 @@
       <p class="form-status" role="status" aria-live="polite"></p>
     </form>
   </div>
-</div><div class="modal" id="delete-modal" hidden role="dialog" aria-modal="true" aria-labelledby="del-title">
+</div><div class="modal" id="profile-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pf-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel small-modal">
+    <div class="modal-head"><div class="modal-titles"><h3 id="pf-title">Edit profile</h3></div><button type="button" class="icon-btn" data-modal-close aria-label="Close"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M368 368L144 144M368 144L144 368"/></svg></button></div>
+    <form class="form modal-body" data-profile-form novalidate>
+      <label class="field"><span>Full name</span><input name="name" required autocomplete="name"></label>
+      <label class="field"><span>Country</span><input name="country" required autocomplete="country-name"></label>
+      <input type="hidden" name="email">
+      <div class="am-actions"><button type="button" class="btn btn-ghost-dark" data-modal-close>Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+      <p class="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+<div class="modal" id="password-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pw-title">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-panel small-modal">
+    <div class="modal-head"><div class="modal-titles"><h3 id="pw-title">Change password</h3></div><button type="button" class="icon-btn" data-modal-close aria-label="Close"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M368 368L144 144M368 144L144 368"/></svg></button></div>
+    <form class="form modal-body" data-password-form novalidate>
+      <label class="field"><span>Current password</span><input name="current" type="password" required autocomplete="current-password"></label>
+      <label class="field"><span>New password</span><input name="next" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></label>
+      <label class="field"><span>Confirm new password</span><input name="confirm" type="password" required autocomplete="new-password"></label>
+      <p class="small muted">Forgot it? <button type="button" class="link-btn inline" data-send-reset>Email me a reset link</button></p>
+      <div class="am-actions"><button type="button" class="btn btn-ghost-dark" data-modal-close>Cancel</button><button type="submit" class="btn btn-primary">Update password</button></div>
+      <p class="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+<div class="modal" id="delete-modal" hidden role="dialog" aria-modal="true" aria-labelledby="del-title">
   <div class="modal-backdrop" data-modal-close></div>
   <div class="modal-panel small-modal">
     <div class="modal-head">
