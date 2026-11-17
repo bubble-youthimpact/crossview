@@ -943,3 +943,28 @@ body.no-footer .route:not([hidden])>.auth{width:100%}
 .msg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .msg-del{color:#be123c}
 @media (max-width:600px){.msg-top em{margin-left:0;width:100%}.msg-body{padding-left:20px}.seg-btn{padding:9px 14px;font-size:14px}}
+
+/* header login label: chosen before scripts load, from a hint saved at sign-in */
+.login-btn .lb-in{display:none}
+html.cv-in .login-btn .lb-in{display:inline}
+html.cv-in .login-btn .lb-out{display:none}
+/* member pages: loading state while the account is restored */
+.member-loading{display:flex;justify-content:center;padding:80px 0}
+.member-loading[hidden]{display:none}
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid #dfe5f3;border-top-color:var(--blue);animation:cvspin .8s linear infinite}
+@keyframes cvspin{to{transform:rotate(360deg)}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* account settings */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:6px}
+.set-block h3{font-size:17px;margin-bottom:12px}
+.set-block .field{margin-bottom:12px}
+.set-block input:disabled{background:#f1f3f8;color:var(--gray);cursor:not-allowed}
+.set-actions{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:4px}
+.danger-zone{display:flex;gap:20px;align-items:center;justify-content:space-between;margin-top:26px;padding:20px 22px;border:1px solid #f6c9d1;background:#fff7f8;border-radius:14px}
+.danger-zone h3{font-size:17px;color:#be123c;margin-bottom:4px}
+.danger-zone p{margin:0;font-size:14.5px;max-width:620px}
+.btn-danger{background:#e11d48;color:#fff;border:0}
+.btn-danger:hover{background:#be123c;color:#fff;text-decoration:none}
+.danger-text{color:#be123c}
+.small-modal{max-width:480px}
+@media (max-width:760px){.set-grid{grid-template-columns:1fr}.danger-zone{flex-direction:column;align-items:flex-start}.danger-zone .btn{width:100%}}

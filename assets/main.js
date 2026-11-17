@@ -453,7 +453,7 @@
       var s = LS.get('cv-session', null), a = s && this._accounts()[s];
       if (!a) return null;
       return { uid: a.email, email: a.email, name: a.name, country: a.country || '', joined: a.joined, progress: a.progress || [],
-               role: a.role || 'member', articles: this._articles().filter(function (x) { return x.uid === a.email; }) };
+               role: a.role || 'member', provider: 'password', articles: this._articles().filter(function (x) { return x.uid === a.email; }) };
     },
     onChange: function (cb) { this._cbs.push(cb); var self = this; setTimeout(function () { cb(self.current()); }, 0); },
     _emit: function () { var c = this.current(); this._cbs.forEach(function (cb) { cb(c); }); return c; },
@@ -486,6 +486,25 @@
       var saved = Object.assign({}, art, { id: id, uid: cur.uid, authorName: cur.name, authorCountry: cur.country, updated: new Date().toISOString() });
       LS.set('cv-articles', arts.filter(function (x) { return x.id !== id; }).concat(saved));
       this._emit(); return Promise.resolve(saved);
+    },
+    changePassword: function (oldPw, newPw) {
+      var self = this, s = LS.get('cv-session');
+      return Promise.all([hash(oldPw), hash(newPw)]).then(function (h) {
+        var all = self._accounts();
+        if (!all[s] || all[s].pw !== h[0]) throw new Error('Your current password isn’t right.');
+        all[s].pw = h[1]; LS.set('cv-accounts', all);
+      });
+    },
+    deleteAccount: function (pw) {
+      var self = this, s = LS.get('cv-session');
+      return hash(pw || '').then(function (h) {
+        var all = self._accounts();
+        if (!all[s] || all[s].pw !== h) throw new Error('Your password isn’t right.');
+        delete all[s]; LS.set('cv-accounts', all);
+        LS.set('cv-articles', self._articles().filter(function (x) { return x.uid !== s || x.status === 'Published'; }));
+        try { localStorage.removeItem('cv-session'); } catch (e) {}
+        self._emit();
+      });
     },
     listForReview: function () { return Promise.resolve(this._articles().filter(function (x) { return x.status !== 'Draft'; })); },
     review: function (id, patch) {
@@ -550,15 +569,19 @@
 
   /* ---------- header + mobile menu account area */
   function initials(name) { return String(name || '?').split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase(); }
+  function hint() { return LS.get('cv-hint', null); }
+  function saveHint(acc) {
+    try {
+      if (acc) localStorage.setItem('cv-hint', JSON.stringify({ name: acc.name, email: acc.email, role: acc.role }));
+      else if (acc === null) localStorage.removeItem('cv-hint');
+    } catch (e) {}
+  }
   function renderAccountChrome() {
-    var acc = ACC;
-    $$('.login-btn').forEach(function (b) {
-      var label = b.lastChild;
-      if (label && label.nodeType === 3) label.textContent = acc ? 'My Dashboard' : 'Login';
-      b.setAttribute('href', acc ? HREF.dash : HREF.login);
-    });
+    var acc = ACC === undefined ? hint() : ACC;
+    if (ACC !== undefined) saveHint(ACC);
+    document.documentElement.classList.toggle('cv-in', !!acc);
+    $$('.login-btn').forEach(function (b) { b.setAttribute('href', acc ? HREF.dash : HREF.login); });
     $$('[data-mm-account]').forEach(function (box) {
-      if (ACC === undefined) { box.innerHTML = ''; return; }
       box.innerHTML = acc
         ? '<p class="mm-acc-label">Your account</p><div class="mm-user"><span class="mm-av">' + esc(initials(acc.name)) + '</span><span><strong>' + esc(acc.name) + '</strong><em>' + esc(acc.email) + '</em></span></div>' +
           '<a class="mm-btn mm-btn-primary" href="' + HREF.dash + '">My Dashboard</a>' +
@@ -568,6 +591,7 @@
           '<a class="mm-btn" href="' + HREF.login + '" data-then="signup">Create an account</a>';
     });
   }
+  renderAccountChrome();
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-then="signup"]');
     if (t) setTimeout(function () { var b = $('.route:not([hidden]) [data-auth-tab="signup"]') || $('[data-auth-tab="signup"]'); if (b) b.click(); }, 40);
@@ -579,6 +603,8 @@
   function renderMember(errorMsg) {
     var acc = ACC;
     renderAccountChrome();
+    $$('[data-loading]').forEach(function (l) { l.hidden = acc !== undefined || !!errorMsg; });
+    if (!P && acc && /^\/login\/?$/.test(location.pathname)) { go(HREF.dash); return; }
     $$('[data-gate]').forEach(function (g) {
       g.hidden = acc !== null && !errorMsg;
       var m = $('[data-gate-msg]', g); if (m) m.textContent = errorMsg || m.getAttribute('data-default');
@@ -622,7 +648,59 @@
       }).join('');
     });
     if (acc.role === 'admin') { loadReviewQueue(); loadMessages(); }
+    $$('[data-provider-only]').forEach(function (x) { x.hidden = x.getAttribute('data-provider-only') !== (acc.provider || 'password'); });
+    $$('[data-profile-form]').forEach(function (f) {
+      if (f.contains(document.activeElement) && f.getAttribute('data-dirty')) return;
+      f.elements.name.value = acc.name || ''; f.elements.country.value = acc.country || ''; f.elements.email.value = acc.email || '';
+      f.removeAttribute('data-dirty');
+    });
   }
+
+  /* ---------- account settings */
+  document.addEventListener('input', function (e) { var f = e.target.closest && e.target.closest('[data-profile-form]'); if (f) f.setAttribute('data-dirty', '1'); });
+  $$('[data-profile-form]').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!validate(f)) return status(f, 'Please fill in your name and country.', 'err');
+      var btn = $('button[type=submit]', f); btn.disabled = true; status(f, 'Saving…');
+      STORE.saveProfile({ name: f.elements.name.value.trim(), country: f.elements.country.value.trim() })
+        .then(function () { btn.disabled = false; f.removeAttribute('data-dirty'); status(f, 'Saved.', 'ok'); toast('Profile updated'); },
+              function (err) { btn.disabled = false; status(f, esc(err.message), 'err'); });
+    });
+  });
+  $$('[data-password-form]').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var cur = f.elements.current.value, nx = f.elements.next.value, cf = f.elements.confirm.value;
+      if (!cur || !nx || !cf) return status(f, 'Fill in all three fields.', 'err');
+      if (nx.length < 8) return status(f, 'Use at least 8 characters for your new password.', 'err');
+      if (nx !== cf) return status(f, 'The new passwords don’t match.', 'err');
+      var btn = $('button[type=submit]', f); btn.disabled = true; status(f, 'Updating…');
+      STORE.changePassword(cur, nx).then(function () { btn.disabled = false; f.reset(); status(f, 'Password updated.', 'ok'); },
+                                         function (err) { btn.disabled = false; status(f, esc(err.message), 'err'); });
+    });
+    $('[data-send-reset]', f).addEventListener('click', function () {
+      if (!ACC) return;
+      STORE.resetPassword(ACC.email).then(function () { status(f, 'We sent a reset link to ' + esc(ACC.email) + '.', 'ok'); },
+                                          function (err) { status(f, esc(err.message), 'err'); });
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-delete-open]'); if (!b) return;
+    var m = (b.closest('.route') || document).querySelector('#delete-modal'), f = $('form', m);
+    f.reset(); status(f, ''); openModal(m);
+  });
+  $$('[data-delete-form]').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (f.elements.confirm.value.trim().toUpperCase() !== 'DELETE') return status(f, 'Type DELETE to confirm.', 'err');
+      if (ACC && ACC.provider !== 'google' && !f.elements.password.value) return status(f, 'Enter your password to confirm.', 'err');
+      var btn = $('button[type=submit]', f); btn.disabled = true; status(f, 'Deleting your account…');
+      STORE.deleteAccount(f.elements.password.value).then(function () {
+        btn.disabled = false; closeModal(f.closest('.modal')); toast('Your account has been deleted'); go(HREF.home);
+      }, function (err) { btn.disabled = false; status(f, esc(err.message), 'err'); });
+    });
+  });
 
   /* ---------- onboarding */
   function showStep(root, i) {
