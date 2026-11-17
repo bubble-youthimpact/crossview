@@ -915,3 +915,31 @@ body.no-footer .route:not([hidden])>.auth{width:100%}
 .contrib-card.placeholder .tags{display:flex}
 .contrib-card.placeholder .tag.tag-ph{font-size:13.5px;padding:7px 14px}
 .ph-soon{color:#b9c0cc;font-weight:600;font-size:16px}
+
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
+
+/* editor dashboard: view switch + messages */
+.admin-seg{display:inline-flex;gap:4px;background:#eef1f7;border-radius:999px;padding:4px;margin:4px 0 22px;flex-wrap:wrap}
+.seg-btn{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;border-radius:999px;padding:10px 18px;font:inherit;font-weight:700;font-size:15px;color:var(--ink-2);cursor:pointer}
+.seg-btn.is-active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(15,23,42,.1)}
+.seg-btn b{display:inline-flex;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#e11d48;color:#fff;font-size:12px;align-items:center;justify-content:center}
+.seg-btn b[hidden]{display:none}
+.msg-list{display:grid;gap:10px}
+.msg-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.msg-card summary{display:flex;gap:14px;align-items:center;padding:16px 20px;cursor:pointer;list-style:none}
+.msg-card summary::-webkit-details-marker{display:none}
+.msg-dot{width:9px;height:9px;border-radius:50%;background:transparent;flex:none}
+.msg-card.is-unread .msg-dot{background:var(--blue)}
+.msg-card.is-unread .msg-subj{font-weight:700;color:var(--ink)}
+.msg-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.msg-top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.msg-top em{font-style:normal;font-size:13px;color:var(--gray);margin-left:auto}
+.msg-subj{color:var(--ink-2);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-chev{width:18px;height:18px;color:var(--gray);transition:transform .2s;flex:none}
+.msg-card[open] .msg-chev{transform:rotate(180deg)}
+.msg-body{padding:0 20px 18px 43px}
+.msg-body .muted{margin:0 0 10px;overflow-wrap:anywhere}
+.msg-text{background:#f6f8fc;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.msg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.msg-del{color:#be123c}
+@media (max-width:600px){.msg-top em{margin-left:0;width:100%}.msg-body{padding-left:20px}.seg-btn{padding:9px 14px;font-size:14px}}

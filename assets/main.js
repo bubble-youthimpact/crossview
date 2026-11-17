@@ -356,17 +356,23 @@
     return ok;
   }
   function status(form, msg, cls) { var s = $('.form-status', form); s.className = 'form-status ' + (cls || ''); s.innerHTML = msg; }
-  function mail(subject, body) {
-    var href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    try { window.location.href = href; } catch (e) {}
+  /* contact + proposal forms are saved as messages for the editors (admin page → Messages) */
+  function send(form, msg, okMsg) {
+    if (form.elements._honey && form.elements._honey.value) return; // bot
+    if (!window.CV_SEND) return status(form, 'Still connecting… try again in a moment.', 'err');
+    var btn = $('button[type=submit]', form); btn.disabled = true;
+    status(form, 'Sending…');
+    window.CV_SEND(msg).then(function () { btn.disabled = false; form.reset(); status(form, okMsg, 'ok'); },
+      function () { btn.disabled = false; status(form, 'Your message couldn’t be sent. Please try again, or email us at <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>.', 'err'); });
   }
+  function clip(v, n) { return String(v == null ? '' : v).trim().slice(0, n); }
   $$('[data-contact-form]').forEach(function (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!validate(form)) return status(form, 'Please fill in every field with a valid email.', 'err');
       var d = new FormData(form);
-      mail(d.get('subject'), d.get('message') + '\n\n— ' + d.get('name') + ' (' + d.get('email') + ')');
-      status(form, 'Your email app should open with this message. If it doesn’t, write to us at <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>.', 'ok');
+      send(form, { type: 'contact', name: clip(d.get('name'), 200), email: clip(d.get('email'), 200), subject: clip(d.get('subject'), 300),
+                   body: clip(d.get('message'), 8000) }, 'Thanks! Your message has been sent. We’ll get back to you soon.');
     });
   });
   $$('[data-proposal-form]').forEach(function (form) {
@@ -374,10 +380,10 @@
       e.preventDefault();
       if (!validate(form)) return status(form, 'Please complete the required fields.', 'err');
       var d = new FormData(form);
-      mail('Policy proposal: ' + d.get('title'), 'Author(s): ' + d.get('author') + '\nTarget region: ' + d.get('region') +
-        '\n\nObjective:\n' + d.get('objective') + '\n\nProposed action:\n' + d.get('action') +
-        '\n\nExpected impact:\n' + d.get('impact') + '\n\nTrade-offs:\n' + d.get('tradeoffs'));
-      status(form, 'Your email app should open with the proposal. If it doesn’t, send it to <a href="mailto:' + EMAIL + '">' + EMAIL + '</a>.', 'ok');
+      var body = 'Target region: ' + d.get('region') + '\n\nObjective:\n' + d.get('objective') + '\n\nProposed action:\n' + d.get('action') +
+        '\n\nExpected impact:\n' + d.get('impact') + '\n\nTrade-offs:\n' + d.get('tradeoffs');
+      send(form, { type: 'proposal', name: clip(d.get('author'), 200), email: clip(d.get('email'), 200), subject: clip('Policy proposal: ' + d.get('title'), 300),
+                   body: clip(body, 8000) }, 'Thanks! Your proposal has been sent to the CrossView team.');
     });
   });
   /* ---------- login / sign-up
@@ -486,6 +492,13 @@
       var arts = this._articles().map(function (x) { return x.id === id ? Object.assign({}, x, patch, { reviewedAt: new Date().toISOString() }) : x; });
       LS.set('cv-articles', arts); this._emit(); return Promise.resolve();
     },
+    sendMessage: function (m) {
+      var list = LS.get('cv-messages', []); list.push(Object.assign({}, m, { id: 'm' + Date.now().toString(36), read: false, createdAt: new Date().toISOString() }));
+      LS.set('cv-messages', list); return Promise.resolve();
+    },
+    listMessages: function () { return Promise.resolve(LS.get('cv-messages', [])); },
+    markMessage: function (id, read) { LS.set('cv-messages', LS.get('cv-messages', []).map(function (m) { return m.id === id ? Object.assign({}, m, { read: read }) : m; })); return Promise.resolve(); },
+    deleteMessage: function (id) { LS.set('cv-messages', LS.get('cv-messages', []).filter(function (m) { return m.id !== id; })); return Promise.resolve(); },
     listPublished: function () { return Promise.resolve(this._articles().filter(function (x) { return x.status === 'Published'; })); },
     getPublished: function (slug) { return Promise.resolve(this._articles().filter(function (x) { return x.status === 'Published' && (x.slug === slug || x.id === slug); })[0] || null); }
   };
@@ -493,7 +506,7 @@
   /* pick the backend */
   var STORE = null, ACC; // ACC: undefined = still loading, null = signed out
   var useLocal = P;
-  function attach(s) { STORE = s; s.onChange(function (acc) { ACC = acc; renderMember(); }); }
+  function attach(s) { STORE = s; window.CV_SEND = function (m) { return s.sendMessage(m); }; s.onChange(function (acc) { ACC = acc; renderMember(); }); }
   if (useLocal) attach(LocalStore);
   else if (window.CV_FB) attach(window.CV_FB);
   else {
@@ -549,7 +562,7 @@
       box.innerHTML = acc
         ? '<p class="mm-acc-label">Your account</p><div class="mm-user"><span class="mm-av">' + esc(initials(acc.name)) + '</span><span><strong>' + esc(acc.name) + '</strong><em>' + esc(acc.email) + '</em></span></div>' +
           '<a class="mm-btn mm-btn-primary" href="' + HREF.dash + '">My Dashboard</a>' +
-          (acc.role === 'admin' ? '<a class="mm-btn" href="' + HREF.admin + '">Review submissions</a>' : '') +
+          (acc.role === 'admin' ? '<a class="mm-btn" href="' + HREF.admin + '">Editor dashboard</a>' : '') +
           '<button type="button" class="mm-btn" data-sign-out>Sign out</button>'
         : '<a class="mm-btn mm-btn-primary" href="' + HREF.login + '">Sign in</a>' +
           '<a class="mm-btn" href="' + HREF.login + '" data-then="signup">Create an account</a>';
@@ -608,7 +621,7 @@
           '<span data-l="Feedback" class="fb-cell">' + esc(a.feedback ? (a.feedback.length > 40 ? a.feedback.slice(0, 40) + '…' : a.feedback) : '—') + '</span></button>';
       }).join('');
     });
-    if (acc.role === 'admin') loadReviewQueue();
+    if (acc.role === 'admin') { loadReviewQueue(); loadMessages(); }
   }
 
   /* ---------- onboarding */
@@ -771,6 +784,55 @@
         toast(what === 'publish' ? 'Published to Youth Correspondents' : what === 'approve' ? 'Practice piece approved' : what === 'unpublish' ? 'Unpublished' : 'Sent back with notes');
         loadReviewQueue();
       }, function (err) { status(form, esc(err.message), 'err'); });
+    }
+  });
+
+  /* ---------- admin: messages from the contact + proposal forms */
+  var MSGS = [];
+  function fmtDate(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
+  function loadMessages() {
+    if (!STORE || !$('[data-msg-list]')) return;
+    STORE.listMessages().then(function (l) { MSGS = l; drawMessages(); }, function (err) { $$('[data-msg-list]').forEach(function (b) { b.innerHTML = '<p class="form-status err">' + esc(err.message) + '</p>'; }); });
+  }
+  function drawMessages() {
+    var unread = MSGS.filter(function (m) { return !m.read; }).length;
+    $$('[data-msg-count]').forEach(function (c) { c.textContent = unread; c.hidden = !unread; });
+    $$('[data-msg-list]').forEach(function (box) {
+      var rows = MSGS.slice().sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
+      box.innerHTML = rows.length ? rows.map(function (m) {
+        var reply = 'mailto:' + encodeURIComponent(m.email || '') + '?subject=' + encodeURIComponent('Re: ' + (m.subject || 'CrossView'));
+        return '<details class="msg-card' + (m.read ? '' : ' is-unread') + '" data-msg="' + esc(m.id) + '"><summary>' +
+          '<span class="msg-dot" aria-hidden="true"></span><span class="msg-main"><span class="msg-top"><strong>' + esc(m.name || 'Anonymous') + '</strong>' +
+          (m.type === 'proposal' ? '<span class="chip tone-blue">Policy proposal</span>' : '') + '<em>' + esc(fmtDate(m.createdAt)) + '</em></span>' +
+          '<span class="msg-subj">' + esc(m.subject || '(No subject)') + '</span></span>' + ic_chev + '</summary>' +
+          '<div class="msg-body"><p class="muted small">' + esc(m.email || '') + '</p><div class="msg-text">' + esc(m.body || '').replace(/\n/g, '<br>') + '</div>' +
+          '<div class="msg-actions">' + (m.email ? '<a class="btn btn-primary btn-sm" href="' + reply + '">Reply by email</a>' : '') +
+          '<button type="button" class="btn btn-ghost-dark btn-sm" data-msg-read>' + (m.read ? 'Mark as unread' : 'Mark as read') + '</button>' +
+          '<button type="button" class="btn btn-ghost-dark btn-sm msg-del" data-msg-del>Delete</button></div></div></details>';
+      }).join('') : '<div class="empty-state"><p><strong>No messages yet.</strong></p><p class="muted">Messages sent through the Contact Us form and policy proposals will appear here.</p></div>';
+    });
+  }
+  var ic_chev = '<svg class="ic msg-chev" viewBox="0 0 512 512" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M112 184l144 144 144-144"/></svg>';
+  document.addEventListener('toggle', function (e) {
+    var d = e.target; if (!d.matches || !d.matches('details[data-msg]') || !d.open) return;
+    var m = MSGS.filter(function (x) { return x.id === d.getAttribute('data-msg'); })[0];
+    if (m && !m.read) { m.read = true; d.classList.remove('is-unread'); $('[data-msg-read]', d).textContent = 'Mark as unread'; STORE.markMessage(m.id, true); var u = MSGS.filter(function (x) { return !x.read; }).length; $$('[data-msg-count]').forEach(function (c) { c.textContent = u; c.hidden = !u; }); }
+  }, true);
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-admin-view]');
+    if (t) {
+      var v = t.getAttribute('data-admin-view');
+      $$('[data-admin-view]').forEach(function (x) { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', x === t); });
+      $$('[data-admin-panel]').forEach(function (p) { p.hidden = p.getAttribute('data-admin-panel') !== v; });
+      if (v === 'messages') loadMessages();
+      return;
+    }
+    var card = e.target.closest('[data-msg]'); if (!card) return;
+    var id = card.getAttribute('data-msg'), m = MSGS.filter(function (x) { return x.id === id; })[0]; if (!m) return;
+    if (e.target.closest('[data-msg-read]')) { STORE.markMessage(id, !m.read).then(loadMessages); }
+    if (e.target.closest('[data-msg-del]')) {
+      if (!window.confirm('Delete this message? This can’t be undone.')) return;
+      STORE.deleteMessage(id).then(function () { toast('Message deleted'); loadMessages(); });
     }
   });
 

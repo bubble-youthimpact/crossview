@@ -19,7 +19,9 @@
 <meta name="twitter:description" content="Policy Lab is coming soon: a space for students to draft and test policy ideas on global issues.">
 <meta name="twitter:image" content="https://crossview-sp.com/assets/img/og.jpg">
 <meta name="theme-color" content="#0a2a8f">
-<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon.png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
@@ -80,8 +82,10 @@
     <div class="modal-head"><div class="modal-titles"><span class="eyebrow-sm">Policy Lab</span><h3 id="pm-title">Submit a Policy Proposal</h3></div>
       <button type="button" class="icon-btn" data-modal-close aria-label="Close"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M368 368L144 144M368 144L144 368"/></svg></button></div>
     <form class="form modal-body" data-proposal-form novalidate>
+      <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="form-grid">
         <label>Name(s)<input name="author" required></label>
+        <label>Email<input type="email" name="email" required autocomplete="email"></label>
         <label>Target region<input name="region" required placeholder="e.g. Southeast Asia"></label>
       </div>
       <label>Proposal title<input name="title" required></label>

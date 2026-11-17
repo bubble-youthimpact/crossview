@@ -3,24 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Review Submissions — CrossView</title>
+<title>Editor Dashboard — CrossView</title>
 <meta name="description" content="CrossView editor tools.">
 <link rel="canonical" href="https://crossview-sp.com/admin/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CrossView">
-<meta property="og:title" content="Review Submissions — CrossView">
+<meta property="og:title" content="Editor Dashboard — CrossView">
 <meta property="og:description" content="CrossView editor tools.">
 <meta property="og:url" content="https://crossview-sp.com/admin/">
 <meta property="og:image" content="https://crossview-sp.com/assets/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Review Submissions — CrossView">
+<meta name="twitter:title" content="Editor Dashboard — CrossView">
 <meta name="twitter:description" content="CrossView editor tools.">
 <meta name="twitter:image" content="https://crossview-sp.com/assets/img/og.jpg">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0a2a8f">
-<link rel="icon" type="image/png" href="/assets/img/favicon.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon.png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
@@ -56,11 +58,20 @@
       <div class="card gate" data-not-admin hidden><span class="feat-ic"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M336 208v-95a80 80 0 00-160 0v95" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><rect x="96" y="208" width="320" height="272" rx="48" ry="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg></span><h2>Editors only</h2><p class="muted">This page is for CrossView editors. Your own articles are on your dashboard.</p><div class="btn-row center-row"><a href="/profile" class="btn btn-primary">Go to my dashboard</a></div></div>
       <div data-admin-only hidden>
         <a href="/profile" class="back dark"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>Back to dashboard</a>
-        <div class="ob-head"><div><span class="eyebrow">Editor tools</span><h1>Review submissions</h1></div></div>
+        <div class="ob-head"><div><span class="eyebrow">Editor tools</span><h1>Editor dashboard</h1></div></div>
+        <div class="seg admin-seg" role="tablist">
+          <button type="button" class="seg-btn is-active" role="tab" aria-selected="true" data-admin-view="articles"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 221.25V416a48 48 0 01-48 48H144a48 48 0 01-48-48V96a48 48 0 0148-48h98.75a32 32 0 0122.62 9.37l141.26 141.26a32 32 0 019.37 22.62z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="32"/><path d="M256 56v120a32 32 0 0032 32h120M176 288h160M176 368h160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>Article submissions</button>
+          <button type="button" class="seg-btn" role="tab" aria-selected="false" data-admin-view="messages"><svg aria-hidden="true" focusable="false" class="ic " xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect x="48" y="96" width="416" height="320" rx="40" ry="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M112 160l144 112 144-112"/></svg>Messages <b data-msg-count hidden>0</b></button>
+        </div>
+        <div data-admin-panel="articles">
         <div class="chips q-tabs">
           <button type="button" class="fchip is-active" data-q-tab="In Review">Awaiting review <b data-q-count="In Review">0</b></button><button type="button" class="fchip" data-q-tab="Changes requested">Sent back <b data-q-count="Changes requested">0</b></button><button type="button" class="fchip" data-q-tab="Published">Published & approved <b data-q-count="Published">0</b></button>
         </div>
         <div class="rv-list" data-review-list><div class="empty-state"><p class="muted">Loading…</p></div></div>
+        </div>
+        <div data-admin-panel="messages" hidden>
+          <div class="msg-list" data-msg-list><div class="empty-state"><p class="muted">Loading…</p></div></div>
+        </div>
       </div>
     </div>
   </div>
